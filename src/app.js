@@ -9,7 +9,9 @@ import globalErrorHandler from './middlewares/globalErrorHandler.js'
 import baseRouter from './routes/base.routes.js'
 import userRouter from './routes/user.routes.js'
 import adminRouter from './routes/admin.routes.js'
+import citiesRouter from './routes/cities.routes.js'
 import rateLimit from 'express-rate-limit'
+import professionalRouter from './routes/professional.routes.js'
 
 const app = express()
 
@@ -64,6 +66,8 @@ app.use(
 app.use('/', baseRouter)
 app.use('/api/v1/users', userRouter)
 app.use('/api/v1/admin', adminRouter)
+app.use('/api/v1/cities', citiesRouter)
+app.use('/api/v1/professionals', professionalRouter)
 
 // global error handler
 app.all(

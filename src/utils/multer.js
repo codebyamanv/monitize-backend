@@ -10,6 +10,9 @@ const storage = multer.diskStorage({
             case 'avatar':
                 uploadFolder = 'uploads/avatar'
                 break
+            case 'professional_avatar':
+                uploadFolder = 'uploads/professional_avatar'
+                break
             default:
                 uploadFolder = 'uploads/other'
         }

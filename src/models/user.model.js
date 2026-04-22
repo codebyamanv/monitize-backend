@@ -30,6 +30,10 @@ const userSchema = new Schema(
             enum: ['individual', 'professional', 'business-owner', 'student'],
             default: 'individual',
         },
+        professionalAccount: {
+            type: Schema.Types.ObjectId,
+            ref: 'Professional',
+        },
         interests: {
             type: [String],
             default: [],

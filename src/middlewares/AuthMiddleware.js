@@ -44,7 +44,7 @@ export const accessController = (...allowedRoles) => {
 
         if (!user) {
             res.clearCookie('sessionToken', cookieOptions)
-            return next(new ErrorResponse('Invalid Credentials', 404))
+            return next(new ErrorResponse('Invalid Credentials', 401, 'InvalidCredentialsError'))
         }
 
         if (!allowedRoles.includes(user.role)) {
