@@ -17,7 +17,12 @@ const app = express()
 
 app.use(
     cors({
-        origin: ['http://localhost:3000'],
+        origin: [
+            'http://localhost:3000',
+            'http://localhost:4000',
+            'https://monitize.vercel.app',
+            'https://monitize-admin.vercel.app',
+        ],
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
         credentials: true,
     }),
@@ -48,19 +53,22 @@ app.use(
 
 // Enable this in production so this will prevent postman or any other client from making too many requests to the server, it allow only browsers to send requests
 
-// app.use((req, res, next) => {
-//     const referer = req.get('Referer')
-//     const origin = req.get('Origin')
-//     console.log({ referer, origin })
-//     const allowedDomains = ['https://yourfrontend.com', 'http://localhost:5173']
-//     const isAllowed = allowedDomains.some(
-//         (domain) => origin?.startsWith(domain) || referer?.startsWith(domain),
-//     )
-//     if (!isAllowed) {
-//         return res.status(403).json({ message: 'Invalid origin' })
-//     }
-//     next()
-// })
+app.use((req, res, next) => {
+    const referer = req.get('Referer')
+    const origin = req.get('Origin')
+    console.log({ referer, origin })
+    const allowedDomains = [
+        'http://localhost:3000',
+        'http://localhost:4000',
+        'https://monitize.vercel.app',
+        'https://monitize-admin.vercel.app',
+    ]
+    const isAllowed = allowedDomains.some((domain) => origin?.startsWith(domain) || referer?.startsWith(domain))
+    if (!isAllowed) {
+        return res.status(403).json({ message: 'Invalid origin' })
+    }
+    next()
+})
 
 // add routes
 app.use('/', baseRouter)

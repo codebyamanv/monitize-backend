@@ -40,7 +40,7 @@ const userSchema = new Schema(
         },
         status: {
             type: String,
-            enum: ['active', 'inactive', 'deleted', 'banned', 'disabled'],
+            enum: ['active', 'inactive', 'deleted', 'banned'],
             default: 'active',
         },
         password: {
