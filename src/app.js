@@ -54,23 +54,23 @@ app.use(
 
 // Enable this in production so this will prevent postman or any other client from making too many requests to the server, it allow only browsers to send requests
 
-app.use((req, res, next) => {
-    const referer = req.get('Referer')
-    const origin = req.get('Origin')
-    console.log({ referer, origin })
-    const allowedDomains = [
-        'http://localhost:3000',
-        'http://localhost:4000',
-        'https://monitize.co',
-        'https://www.monitize.co',
-        'https://admin.monitize.co',
-    ]
-    const isAllowed = allowedDomains.some((domain) => origin?.startsWith(domain) || referer?.startsWith(domain))
-    if (!isAllowed) {
-        return res.status(403).json({ message: 'Invalid origin' })
-    }
-    next()
-})
+// app.use((req, res, next) => {
+//     const referer = req.get('Referer')
+//     const origin = req.get('Origin')
+//     console.log({ referer, origin })
+//     const allowedDomains = [
+//         'http://localhost:3000',
+//         'http://localhost:4000',
+//         'https://monitize.co',
+//         'https://www.monitize.co',
+//         'https://admin.monitize.co',
+//     ]
+//     const isAllowed = allowedDomains.some((domain) => origin?.startsWith(domain) || referer?.startsWith(domain))
+//     if (!isAllowed) {
+//         return res.status(403).json({ message: 'Invalid origin' })
+//     }
+//     next()
+// })
 
 // add routes
 app.use('/', baseRouter)
