@@ -57,8 +57,21 @@ export const logoutAdmin = asyncHandler(async (req, res) => {
 })
 
 export const allUsers = asyncHandler(async (req, res) => {
-    const users = await User.find({}).select('-password').lean()
-    return ApiResponse.success({ users }, 'All User Fetched').send(res)
+    const { limit = 10, page = 1, q } = req.query
+    const filter = {}
+    if (q) {
+        filter.$or = [
+            { fullname: { $regex: q, $options: 'i' } },
+            { email: { $regex: q, $options: 'i' } },
+            { userType: { $regex: q, $options: 'i' } },
+        ]
+    }
+    const totalDocs = await User.countDocuments(filter)
+    const totalPages = Math.ceil(totalDocs / limit)
+    const skip = (page - 1) * limit
+
+    const users = await User.find(filter).skip(skip).limit(limit).select('-password').lean()
+    return ApiResponse.success({ users, count: totalDocs, totalPages }, 'All User Fetched').send(res)
 })
 // for admin panel only
 
@@ -75,8 +88,24 @@ export const changeUserRole = asyncHandler(async (req, res) => {
 })
 
 export const allProfessionalsApplicants = asyncHandler(async (req, res) => {
-    const professionals = await Professional.find().lean()
-    return ApiResponse.success({ professionals }, 'All Professional Applicants Fetched').send(res)
+    const { limit = 10, page = 1, q } = req.query
+    const filter = {}
+    if (q) {
+        filter.$or = [
+            { fullname: { $regex: q, $options: 'i' } },
+            { email: { $regex: q, $options: 'i' } },
+            { license: { $regex: q, $options: 'i' } },
+            { city: { $regex: q, $options: 'i' } },
+        ]
+    }
+    const totalDocs = await Professional.countDocuments(filter)
+    const totalPages = Math.ceil(totalDocs / limit)
+    const skip = (page - 1) * limit
+    const professionals = await Professional.find(filter).skip(skip).limit(limit).lean()
+    return ApiResponse.success(
+        { professionals, count: totalDocs, totalPages },
+        'All Professional Applicants Fetched',
+    ).send(res)
 })
 // for admin only - approve or reject
 export const updateProfessionalStatus = asyncHandler(async (req, res) => {
@@ -101,4 +130,17 @@ export const updateProfessionalStatus = asyncHandler(async (req, res) => {
         {},
         `Professional applicant ${action === 'approve' ? 'approved' : 'rejected'} successfully.`,
     ).send(res)
+})
+
+// for users
+export const changeEmailVerifyStatus = asyncHandler(async (req, res) => {
+    const { id, action } = req.query
+    await User.findByIdAndUpdate(id, { isEmailVerified: action })
+    return ApiResponse.success({}, 'Email Verify status changed').send(res)
+})
+
+export const removeUserSession = asyncHandler(async (req, res) => {
+    const { id } = req.params
+    const allSessions = await Session.deleteMany({ userId: id })
+    return ApiResponse.success({}, 'All sessions removed successfully').send(res)
 })

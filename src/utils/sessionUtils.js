@@ -9,6 +9,6 @@ export const cookieOptions = {
     secure: true,
     sameSite: 'none',
     path: '/',
-    domain: '.vercel.app',
+    domain: '.monitize.co',
     maxAge: 7 * 24 * 60 * 60 * 1000,
 }

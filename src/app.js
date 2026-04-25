@@ -20,8 +20,9 @@ app.use(
         origin: [
             'http://localhost:3000',
             'http://localhost:4000',
-            'https://monitize.vercel.app',
-            'https://monitize-admin.vercel.app',
+            'https://monitize.co',
+            'https://www.monitize.co',
+            'https://admin.monitize.co',
         ],
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
         credentials: true,
@@ -60,8 +61,9 @@ app.use((req, res, next) => {
     const allowedDomains = [
         'http://localhost:3000',
         'http://localhost:4000',
-        'https://monitize.vercel.app',
-        'https://monitize-admin.vercel.app',
+        'https://monitize.co',
+        'https://www.monitize.co',
+        'https://admin.monitize.co',
     ]
     const isAllowed = allowedDomains.some((domain) => origin?.startsWith(domain) || referer?.startsWith(domain))
     if (!isAllowed) {

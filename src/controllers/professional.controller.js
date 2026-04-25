@@ -83,10 +83,21 @@ export const registerProfessional = asyncHandler(async (req, res) => {
 })
 
 export const allProfessionals = asyncHandler(async (req, res) => {
-    const professionals = await Professional.find({ status: 'approved' })
+    const { limit = 10, page = 1, q } = req.query
+    const filter = {}
+    if (q) {
+        filter.$or = [{ fullname: { $regex: q, $options: 'i' } }]
+    }
+    const totalDocs = await Professional.countDocuments(filter)
+    const totalPages = Math.ceil(totalDocs / limit)
+    const skip = (page - 1) * limit
+
+    const professionals = await Professional.find({ status: 'approved', ...filter })
+        .skip(skip)
+        .limit(limit)
         .select('fullname bio professional_avatar profession specialization city')
         .lean()
-    return ApiResponse.success({ professionals }, 'All Professionals Fetched').send(res)
+    return ApiResponse.success({ professionals, totalPages, totalDocs }, 'All Professionals Fetched').send(res)
 })
 
 export const professionalDetails = asyncHandler(async (req, res) => {

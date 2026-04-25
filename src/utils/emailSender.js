@@ -14,6 +14,7 @@ dotenv.config()
 //     return resendResponse
 // }
 import nodemailer from 'nodemailer'
+import ErrorResponse from './errorResponse.js'
 
 const transporter = nodemailer.createTransport({
     host: process.env.EMAIL_HOST,
@@ -38,7 +39,10 @@ export const sendEmail = async ({ to, subject, html, text }) => {
         const info = await transporter.sendMail(mailOptions)
         return info
     } catch (error) {
-        throw new Error('Failed to send email')
+        throw new ErrorResponse(
+            'Failed to send email, but we have created you account. your can verify email now.',
+            500,
+        )
     }
 }
 
