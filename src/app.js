@@ -20,8 +20,7 @@ app.use(
         origin: [
             'http://localhost:3000',
             'http://localhost:4000',
-            'https://monitize.co',
-            'https://www.monitize.co',
+            'https://test.monitize.co',
             'https://admin.monitize.co',
         ],
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
