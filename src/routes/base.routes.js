@@ -3,7 +3,7 @@ import { Router } from 'express'
 const baseRouter = Router()
 
 baseRouter.get('/', (req, res) => {
-    res.send('Server is running!')
+    res.send('Monitize Server Started...')
 })
 
 export default baseRouter

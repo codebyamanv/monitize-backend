@@ -1,15 +1,12 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import Session from '../models/session.model.js'
-import User from '../models/user.model.js'
-import ApiResponse from '../utils/apiResponse.js'
-import asyncHandler from '../utils/asyncHandler.js'
-import ErrorResponse from '../utils/errorResponse.js'
+import { User, Session } from '../helpers/modelHelper.js'
+import { ApiResponse, asyncHandler, ErrorResponse } from '../helpers/handlersHelper.js'
 import { cookieOptions, generateSessionToken } from '../utils/sessionUtils.js'
 import { loginValidator, registerValidator } from '../validators/authValidator.js'
+import { sendEmail } from '../utils/emailSender.js'
 
 import crypto from 'crypto'
-import { sendEmail } from '../utils/emailSender.js'
 
 export const register = asyncHandler(async (req, res) => {
     const { success, data, error } = registerValidator.safeParse(req.body)
@@ -191,24 +188,20 @@ export const login = asyncHandler(async (req, res) => {
     }
 
     const user = await User.findOne({ email: data.email })
-    if (!user.isEmailVerified) {
-        throw new ErrorResponse('Email not verified.', 401, 'EmailNotVerifiedError')
-    }
     if (!user) {
-        throw new ErrorResponse('Invalid credentials', 401, 'InvalidCredentialsError')
+        throw new ErrorResponse('Invalid credentials', 401)
+    }
+    if (!user.isEmailVerified) {
+        throw new ErrorResponse('Email not verified.', 403)
     }
     const isPasswordCorrect = await user.isPasswordCorrect(data.password)
     if (!isPasswordCorrect) {
-        throw new ErrorResponse('Invalid credentials', 401, 'InvalidCredentialsError')
+        throw new ErrorResponse('Invalid credentials', 403)
     }
-
     const sessionToken = generateSessionToken()
 
     // delete all sessions except the current one
-    const allSessions = await Session.find({ userId: user._id })
-    if (allSessions.length > 1) {
-        await allSessions[0].deleteOne()
-    }
+    await Session.deleteMany({ userId: user._id })
     await Session.create({
         userId: user._id,
         token: sessionToken,

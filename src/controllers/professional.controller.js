@@ -1,9 +1,6 @@
 import fs from 'node:fs/promises'
-import Professional from '../models/professional.model.js'
-import User from '../models/user.model.js'
-import ApiResponse from '../utils/apiResponse.js'
-import asyncHandler from '../utils/asyncHandler.js'
-import ErrorResponse from '../utils/errorResponse.js'
+import { Professional, User, Booking } from '../helpers/modelHelper.js'
+import { ApiResponse, asyncHandler, ErrorResponse } from '../helpers/handlersHelper.js'
 import { registerProfessionalValidator } from '../validators/professionalValidator.js'
 
 export const registerProfessional = asyncHandler(async (req, res) => {
@@ -17,7 +14,6 @@ export const registerProfessional = asyncHandler(async (req, res) => {
     // 🔁 Helper to cleanup uploaded files
     const cleanupFiles = async () => {
         const paths = [kycPath, licensePath, avatarPath]
-        console.log(paths)
         await Promise.all(
             paths.map((p) =>
                 fs.unlink(p).catch((e) => {
@@ -108,4 +104,32 @@ export const professionalDetails = asyncHandler(async (req, res) => {
     const maskedPart = '*'.repeat(professional.license.length - 3)
     professional.license = maskedPart + visiblePart
     return ApiResponse.success(professional, 'Professional Details Fetched').send(res)
+})
+
+export const bookProfessional = asyncHandler(async (req, res) => {
+    const { professionalId } = req.body
+    const professional = await Professional.findById(professionalId).select('_id').lean()
+    if (!professional) {
+        throw new ErrorResponse('Professional not found', 404, 'ProfessionalNotFoundError')
+    }
+    const result = await Booking.create({ ...req.body, professional: req.body.professionalId, user: req.user._id })
+
+    return ApiResponse.success(professional, 'Booking Successful. Professional will contact you soon').send(res)
+})
+
+export const allProfessionalBookings = asyncHandler(async (req, res) => {
+    const { limit = 10, page = 1, q } = req.query
+    const filter = {}
+    if (q) {
+        filter.$or = [{ fullname: { $regex: q, $options: 'i' } }]
+    }
+    const totalDocs = await Booking.countDocuments({ ...filter, professional: req.user.professionalAccount })
+    const totalPages = Math.ceil(totalDocs / limit)
+    const skip = (page - 1) * limit
+    const bookings = await Booking.find({ ...filter, professional: req.user.professionalAccount })
+        .skip(skip)
+        .limit(limit)
+        .select('')
+        .lean()
+    return ApiResponse.success({ bookings, totalPages, totalDocs }, 'All Bookings Fetched').send(res)
 })

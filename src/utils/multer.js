@@ -19,6 +19,9 @@ const storage = multer.diskStorage({
             case 'license_document':
                 uploadFolder = 'uploads/license_document'
                 break
+            case 'testimonial_image':
+                uploadFolder = 'uploads/testimonial_image'
+                break
             default:
                 uploadFolder = 'uploads/other'
         }

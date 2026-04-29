@@ -1,7 +1,5 @@
-import Session from '../models/session.model.js'
-import User from '../models/user.model.js'
-import asyncHandler from '../utils/asyncHandler.js'
-import ErrorResponse from '../utils/errorResponse.js'
+import { Session, User } from '../helpers/modelHelper.js'
+import { asyncHandler, ErrorResponse } from '../helpers/handlersHelper.js'
 import { cookieOptions } from '../utils/sessionUtils.js'
 
 export const accessController = (...allowedRoles) => {
@@ -25,7 +23,7 @@ export const accessController = (...allowedRoles) => {
             return next(new ErrorResponse('Login to continue', 401, 'CookieNotFoundError'))
         }
 
-        const session = await Session.findOne({ token: sessionToken })
+        const session = await Session.findOne({ token: sessionToken }).lean()
 
         if (!session) {
             res.clearCookie('sessionToken', cookieOptions)
@@ -38,9 +36,10 @@ export const accessController = (...allowedRoles) => {
             return next(new ErrorResponse('Your session has expired. Please log in again', 401, 'SessionExpiredError'))
         }
 
-        const user = await User.findById(session.userId).select(
-            '-password -emailVerificationToken -emailVerificationExpires -__v',
-        )
+        const user = await User.findById(session.userId)
+            .populate('professionalAccount')
+            .select('-password -emailVerificationToken -emailVerificationExpires -__v')
+            .lean()
 
         if (!user) {
             res.clearCookie('sessionToken', cookieOptions)

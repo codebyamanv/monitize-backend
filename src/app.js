@@ -6,23 +6,14 @@ import helmet from 'helmet'
 import morgan from 'morgan'
 import asyncHandler from './utils/asyncHandler.js'
 import globalErrorHandler from './middlewares/globalErrorHandler.js'
-import baseRouter from './routes/base.routes.js'
-import userRouter from './routes/user.routes.js'
-import adminRouter from './routes/admin.routes.js'
-import citiesRouter from './routes/cities.routes.js'
 import rateLimit from 'express-rate-limit'
-import professionalRouter from './routes/professional.routes.js'
+import { routes, origin } from './utils/constant.js'
 
 const app = express()
 
 app.use(
     cors({
-        origin: [
-            'http://localhost:3000',
-            'http://localhost:4000',
-            'https://test.monitize.co',
-            'https://admin.monitize.co',
-        ],
+        origin,
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
         credentials: true,
     }),
@@ -71,13 +62,9 @@ app.use(
 //     next()
 // })
 
-// add routes
-app.use('/', baseRouter)
-app.use('/api/v1/users', userRouter)
-app.use('/api/v1/admin', adminRouter)
-app.use('/api/v1/cities', citiesRouter)
-app.use('/api/v1/professionals', professionalRouter)
-
+routes.forEach(({ path, router }) => {
+    app.use(path, router)
+})
 // global error handler
 app.all(
     '/*catchAll',
